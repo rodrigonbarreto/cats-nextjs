@@ -10,15 +10,19 @@ interface CatCardProps {
     isFavorite?: boolean;
     onSave?: () => void;
     onDelete?: (id: number) => Promise<void>;
+    onUpdate?: (id: number, name: string, cat: SavedCat) => Promise<SavedCat | void>;
 }
 
-const CatCard = ({ cat, isFavorite = false, onSave, onDelete }: CatCardProps) => {
+const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCardProps) => {
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [updating, setUpdating] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showNameInput, setShowNameInput] = useState(false);
+    const [showEditInput, setShowEditInput] = useState(false);
     const [nickName, setNickName] = useState(`Cat ${cat.id}`);
+    const [editName, setEditName] = useState('');
 
     const saveCat = async () => {
         try {
@@ -57,8 +61,39 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete }: CatCardProps) =>
         }
     };
 
+    const updateCat = async () => {
+        try {
+            if ('id' in cat && typeof cat.id === 'number' && 'cod_cat' in cat) {
+                setUpdating(true);
+                setError(null);
+                const newName = editName.trim() || displayName || `Cat ${cat.id}`;
+                if (onUpdate) await onUpdate(cat.id, newName, cat as SavedCat);
+                setShowEditInput(false);
+            } else {
+                setError('Este gato não pode ser atualizado');
+                toast.error('Este gato não pode ser atualizado');
+            }
+        } catch (err) {
+            setError('Falha ao atualizar o nome');
+            console.error('Error updating cat name:', err);
+            toast.error('Não foi possível atualizar o nome');
+        } finally {
+            setUpdating(false);
+        }
+    };
+
     const handleAddButtonClick = () => {
         setShowNameInput(true);
+    };
+
+    const handleEditButtonClick = () => {
+        setEditName((cat as SavedCat).name || '');
+        setShowEditInput(true);
+    };
+
+    const handleEditSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        updateCat();
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -80,30 +115,94 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete }: CatCardProps) =>
             </div>
             <div className="p-4">
                 <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-semibold text-gray-800">
-                        {displayName}
-                    </h3>
+                    {showEditInput && isFavorite ? (
+                        <form onSubmit={handleEditSubmit} className="flex-1 mr-2">
+                            <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm text-black"
+                                placeholder="Novo nome"
+                                disabled={updating}
+                                autoFocus
+                            />
+                        </form>
+                    ) : (
+                        <h3 className="text-lg font-semibold text-gray-800">
+                            {displayName}
+                        </h3>
+                    )}
 
                     {isFavorite && 'id' in cat && typeof cat.id === 'number' && (
-                        <button
-                            onClick={deleteCat}
-                            disabled={deleting}
-                            className={`text-red-500 hover:text-red-700 focus:outline-none ${deleting ? 'opacity-50' : ''}`}
-                            title="Excluir gato"
-                        >
-                            {deleting ? (
-                                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
+                        <div className="flex space-x-2">
+                            {showEditInput ? (
+                                <>
+                                    <button
+                                        onClick={() => setShowEditInput(false)}
+                                        className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                                        title="Cancelar"
+                                        disabled={updating}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={updateCat}
+                                        className="text-green-500 hover:text-green-700 focus:outline-none"
+                                        title="Salvar nome"
+                                        disabled={updating}
+                                        type="button"
+                                    >
+                                        {updating ? (
+                                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </>
                             ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
+                                <>
+                                    <button
+                                        onClick={handleEditButtonClick}
+                                        className="text-blue-500 hover:text-blue-700 focus:outline-none"
+                                        title="Editar nome"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={deleteCat}
+                                        disabled={deleting}
+                                        className={`text-red-500 hover:text-red-700 focus:outline-none ${deleting ? 'opacity-50' : ''}`}
+                                        title="Excluir gato"
+                                    >
+                                        {deleting ? (
+                                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </>
                             )}
-                        </button>
+                        </div>
                     )}
                 </div>
+
+                {error && (
+                    <p className="text-red-500 text-xs mt-2">{error}</p>
+                )}
 
                 <div className="mt-2 text-sm text-gray-600">
                     <p>ID: {displayId}</p>
@@ -113,10 +212,6 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete }: CatCardProps) =>
 
                 {!isFavorite && (
                     <div className="mt-4">
-                        {error && (
-                            <p className="text-red-500 text-xs mb-2">{error}</p>
-                        )}
-
                         {showNameInput ? (
                             <form onSubmit={handleSubmit} className="space-y-3">
                                 <div>

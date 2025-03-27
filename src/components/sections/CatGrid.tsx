@@ -6,9 +6,10 @@ interface CatGridProps {
     isFavorites?: boolean;
     onCatSaved?: () => void;
     onCatDeleted?: (id: number) => Promise<void>;
+    onCatUpdated?: (id: number, name: string, cat: SavedCat) => Promise<SavedCat | void>;
 }
 
-const CatGrid = ({ cats, isFavorites = false, onCatSaved, onCatDeleted }: CatGridProps) => {
+const CatGrid = ({ cats, isFavorites = false, onCatSaved, onCatDeleted, onCatUpdated }: CatGridProps) => {
     if (!cats.length) {
         return (
             <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md p-4">
@@ -28,6 +29,7 @@ const CatGrid = ({ cats, isFavorites = false, onCatSaved, onCatDeleted }: CatGri
                     isFavorite={isFavorites}
                     onSave={onCatSaved}
                     onDelete={onCatDeleted}
+                    onUpdate={onCatUpdated}
                 />
             ))}
         </div>

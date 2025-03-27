@@ -37,13 +37,30 @@ export default function Favorites() {
         }
     };
 
+    const handleUpdateCat = async (id: number, name: string, catObj: SavedCat) => {
+        try {
+            const updatedCat = await catService.updateCatName(id, name, catObj);
+
+            setCats(cats.map(cat =>
+                cat.id === id ? { ...cat, name } : cat
+            ));
+
+            toast.success('Nome do gato atualizado com sucesso!');
+            return updatedCat;
+        } catch (err) {
+            console.error('Error updating cat name:', err);
+            toast.error('Falha ao atualizar o nome do gato');
+            throw err;
+        }
+    };
+
     useEffect(() => {
         fetchMyCats();
     }, []);
 
     return (
         <div className="container mx-auto px-4 py-8">
-
+            <Toaster />
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Meus Gatos Adotados</h1>
                 <button
@@ -67,6 +84,7 @@ export default function Favorites() {
                     cats={cats}
                     isFavorites={true}
                     onCatDeleted={handleDeleteCat}
+                    onCatUpdated={handleUpdateCat}
                 />
             )}
         </div>

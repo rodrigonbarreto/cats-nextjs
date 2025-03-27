@@ -44,6 +44,22 @@ export const catService = {
         }
     },
 
+    updateCatName: async (id: number, name: string, cat: SavedCat): Promise<SavedCat> => {
+        try {
+            const response = await api.put<SavedCat>(`/cats/${id}`, {
+                cod_cat: cat.cod_cat,
+                width: cat.width,
+                height: cat.height,
+                url: cat.url,
+                name: name
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error updating cat name:', error);
+            throw error;
+        }
+    },
+
     deleteCat: async (id: number): Promise<void> => {
         try {
             await api.delete(`/cats/${id}`);
