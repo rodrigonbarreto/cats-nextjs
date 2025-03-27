@@ -3,40 +3,54 @@
 import { useState, useEffect } from 'react';
 import { catService } from '@/services/api';
 import CatGrid from '@/components/sections/CatGrid';
-import { ExternalCat } from '@/types/cat';
+import { SavedCat } from '@/types/cat';
+import { Toaster, toast } from 'react-hot-toast';
 
-export default function Home() {
-    const [cats, setCats] = useState<ExternalCat[]>([]);
+export default function Favorites() {
+    const [cats, setCats] = useState<SavedCat[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchCats = async () => {
+    const fetchMyCats = async () => {
         try {
             setLoading(true);
-            const data = await catService.getExternalCats();
+            const data = await catService.getMyCats();
             setCats(data);
             setError(null);
         } catch (err) {
-            setError('Falha ao buscar os gatos. Por favor, tente novamente mais tarde.');
-            console.error('Error fetching cats:', err);
+            setError('Falha ao buscar seus gatos favoritos. Por favor, tente novamente mais tarde.');
+            console.error('Error fetching favorite cats:', err);
+            toast.error('Não foi possível carregar seus gatos favoritos');
         } finally {
             setLoading(false);
         }
     };
 
+    const handleDeleteCat = async (id: number) => {
+        try {
+            await catService.deleteCat(id);
+            setCats(cats.filter(cat => cat.id !== id));
+            toast.success('Gato excluído com sucesso!');
+        } catch (err) {
+            console.error('Error deleting cat:', err);
+            toast.error('Falha ao excluir o gato');
+        }
+    };
+
     useEffect(() => {
-        fetchCats();
+        fetchMyCats();
     }, []);
 
     return (
         <div className="container mx-auto px-4 py-8">
+
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">Descubra Gatos</h1>
+                <h1 className="text-2xl font-bold text-gray-800">Meus Gatos Adotados</h1>
                 <button
-                    onClick={fetchCats}
+                    onClick={fetchMyCats}
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                 >
-                    Atualizar Gatos
+                    Atualizar
                 </button>
             </div>
 
@@ -49,7 +63,11 @@ export default function Home() {
                     <span className="block sm:inline">{error}</span>
                 </div>
             ) : (
-                <CatGrid cats={cats} />
+                <CatGrid
+                    cats={cats}
+                    isFavorites={true}
+                    onCatDeleted={handleDeleteCat}
+                />
             )}
         </div>
     );
