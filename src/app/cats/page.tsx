@@ -26,9 +26,6 @@ export default function Cats() {
         }
     };
 
-    const handleCatSaved = () => {
-        toast.success("Gato adotado com sucesso!");
-    };
 
     useEffect(() => {
         fetchCats();
@@ -57,7 +54,6 @@ export default function Cats() {
             ) : (
                 <CatGrid
                     cats={cats}
-                    onCatSaved={handleCatSaved}
                 />
             )}
         </div>

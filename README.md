@@ -1,4 +1,4 @@
-# Aplicação Frontend de Adoção de Gatos
+# Aplicação Frontend de Adoção de Gatos e Cães  - PUC-RJ - pós-graduação
 
 Este é um projeto para PUC-RJ desenvolvido em Next.js, TypeScript e Tailwind CSS.
 O projeto é uma aplicação de adoção de gatos, onde os usuários podem visualizar informações sobre gatos disponíveis para adoção.
@@ -39,6 +39,9 @@ bun dev
 ```
 
 Acesse [http://localhost:3000](http://localhost:3000) com seu navegador para ver o resultado.
+
+## Fluxograma
+![Diagrama de Arquitetura](./fluograma.png)
 
 ## Saiba Mais
 
