@@ -1,19 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { ExternalCat, SavedCat } from '@/types/cat';
-import { catService } from '@/services/api';
+import { ExternalDog, SavedDog } from '@/types/dog';
+import { dogService } from '@/services/dogApi';
 import { toast } from 'react-hot-toast';
 
-interface CatCardProps {
-    cat: ExternalCat | SavedCat;
+interface DogCardProps {
+    dog: ExternalDog | SavedDog;
     isFavorite?: boolean;
     onSave?: () => void;
     onDelete?: (id: number) => Promise<void>;
-    onUpdate?: (id: number, name: string, cat: SavedCat) => Promise<SavedCat | void>;
+    onUpdate?: (id: number, name: string, dog: SavedDog) => Promise<SavedDog | void>;
 }
 
-const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCardProps) => {
+const DogCard = ({ dog, isFavorite = false, onSave, onDelete, onUpdate }: DogCardProps) => {
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -21,61 +21,60 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCar
     const [error, setError] = useState<string | null>(null);
     const [showNameInput, setShowNameInput] = useState(false);
     const [showEditInput, setShowEditInput] = useState(false);
-    const [nickName, setNickName] = useState(`Cat ${cat.id}`);
+    const [nickName, setNickName] = useState(`Dog ${dog.id}`);
     const [editName, setEditName] = useState('');
 
-    const saveCat = async () => {
+    const saveDog = async () => {
         try {
             setSaving(true);
             setError(null);
-            console.log(' nickname', nickName.trim());
-            await catService.saveCat({
-                ...cat as ExternalCat,
-                name: nickName.trim() || `Cat ${cat.id}`
+            await dogService.saveDog({
+                ...dog as ExternalDog,
+                name: nickName.trim() || `Dog ${dog.id}`
             });
             setSaved(true);
             if (onSave) onSave();
-            toast.success('Gato adotado com sucesso!');
+            toast.success('Cachorro adotado com sucesso!');
         } catch (err) {
-            setError('Falha ao adotar o gato');
-            console.error('Error saving cat:', err);
-            toast.error('Não foi possível adotar o gato');
+            setError('Falha ao adotar o cachorro');
+            console.error('Error saving dog:', err);
+            toast.error('Não foi possível adotar o cachorro');
         } finally {
             setSaving(false);
             setShowNameInput(false);
         }
     };
 
-    const deleteCat = async () => {
+    const deleteDog = async () => {
         try {
-            if ('id' in cat && typeof cat.id === 'number') {
+            if ('id' in dog && typeof dog.id === 'number') {
                 if (window.confirm(`Tem certeza de que deseja excluir "${displayName}"?`)) {
                     setDeleting(true);
-                    if (onDelete) await onDelete(cat.id);
+                    if (onDelete) await onDelete(dog.id);
                 }
             }
         } catch (err) {
-            setError('Falha ao excluir o gato');
-            console.error('Error deleting cat:', err);
+            setError('Falha ao excluir o cachorro');
+            console.error('Error deleting dog:', err);
             setDeleting(false);
         }
     };
 
-    const updateCat = async () => {
+    const updateDog = async () => {
         try {
-            if ('id' in cat && typeof cat.id === 'number' && 'type' in cat) {
+            if ('id' in dog && typeof dog.id === 'number' && 'code_pet' in dog) {
                 setUpdating(true);
                 setError(null);
-                const newName = editName.trim() || displayName || `Cat ${cat.id}`;
-                if (onUpdate) await onUpdate(cat.id, newName, cat as SavedCat);
+                const newName = editName.trim() || displayName || `Dog ${dog.id}`;
+                if (onUpdate) await onUpdate(dog.id, newName, dog as SavedDog);
                 setShowEditInput(false);
             } else {
-                setError('Este gato não pode ser atualizado');
-                toast.error('Este gato não pode ser atualizado');
+                setError('Este cachorro não pode ser atualizado');
+                toast.error('Este cachorro não pode ser atualizado');
             }
         } catch (err) {
             setError('Falha ao atualizar o nome');
-            console.error('Error updating cat name:', err);
+            console.error('Error updating dog name:', err);
             toast.error('Não foi possível atualizar o nome');
         } finally {
             setUpdating(false);
@@ -87,29 +86,29 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCar
     };
 
     const handleEditButtonClick = () => {
-        setEditName((cat as SavedCat).name || '');
+        setEditName((dog as SavedDog).name || '');
         setShowEditInput(true);
     };
 
     const handleEditSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        updateCat();
+        updateDog();
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        saveCat();
+        saveDog();
     };
 
-    const displayId = 'cod_cat' in cat ? cat.cod_cat : cat.id;
-    const displayName = 'name' in cat ? cat.name : `Cat ${cat.id}`;
+    const displayId = 'code_pet' in dog ? dog.code_pet : dog.id;
+    const displayName = 'name' in dog ? dog.name : `Dog ${dog.id}`;
 
     return (
         <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
             <div className="relative">
                 <img
-                    src={cat.url}
-                    alt={`Gato ${displayId}`}
+                    src={dog.url}
+                    alt={`Cachorro ${displayId}`}
                     className="w-full h-48 object-cover"
                 />
             </div>
@@ -133,7 +132,7 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCar
                         </h3>
                     )}
 
-                    {isFavorite && 'id' in cat && typeof cat.id === 'number' && (
+                    {isFavorite && 'id' in dog && typeof dog.id === 'number' && (
                         <div className="flex space-x-2">
                             {showEditInput ? (
                                 <>
@@ -148,7 +147,7 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCar
                                         </svg>
                                     </button>
                                     <button
-                                        onClick={updateCat}
+                                        onClick={updateDog}
                                         className="text-green-500 hover:text-green-700 focus:outline-none"
                                         title="Salvar nome"
                                         disabled={updating}
@@ -178,10 +177,10 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCar
                                         </svg>
                                     </button>
                                     <button
-                                        onClick={deleteCat}
+                                        onClick={deleteDog}
                                         disabled={deleting}
                                         className={`text-red-500 hover:text-red-700 focus:outline-none ${deleting ? 'opacity-50' : ''}`}
-                                        title="Excluir gato"
+                                        title="Excluir cachorro"
                                     >
                                         {deleting ? (
                                             <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -206,8 +205,8 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCar
 
                 <div className="mt-2 text-sm text-gray-600">
                     <p>ID: {displayId}</p>
-                    <p>Largura: {cat.width}px</p>
-                    <p>Altura: {cat.height}px</p>
+                    <p>Largura: {dog.width}px</p>
+                    <p>Altura: {dog.height}px</p>
                 </div>
 
                 {!isFavorite && (
@@ -224,7 +223,7 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCar
                                         value={nickName}
                                         onChange={(e) => setNickName(e.target.value)}
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-black"
-                                        placeholder="Digite o nome do gato"
+                                        placeholder="Digite o nome do cachorro"
                                         disabled={saving}
                                     />
                                 </div>
@@ -255,7 +254,7 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCar
                                 disabled
                                 className="w-full py-2 px-3 rounded text-sm font-medium bg-green-500 text-white"
                             >
-                                Gato adotado
+                                Cachorro adotado
                             </button>
                         ) : (
                             <button
@@ -272,4 +271,4 @@ const CatCard = ({ cat, isFavorite = false, onSave, onDelete, onUpdate }: CatCar
     );
 };
 
-export default CatCard;
+export default DogCard;

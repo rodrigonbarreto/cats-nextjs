@@ -29,6 +29,7 @@ export default function Home() {
                     </div>
                 </Link>
 
+                {/* Card para Cachorros */}
                 <Link href="/dogs" className="block">
                     <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full">
                         <div className="h-64 bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center">

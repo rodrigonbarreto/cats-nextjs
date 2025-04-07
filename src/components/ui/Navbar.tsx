@@ -6,17 +6,23 @@ const Navbar = () => {
             <div className="container mx-auto px-4 py-3">
                 <div className="flex justify-between items-center">
                     <Link href="/" className="text-xl font-bold">
-                       Ache o seu amigo Felino
+                        Adote seu Pet
                     </Link>
                     <div className="space-x-4">
-                        <Link href="/" className="hover:text-blue-200">
+                        <Link href="/home" className="hover:text-blue-200">
                             Home
                         </Link>
-                        <Link href="/favorites" className="hover:text-blue-200">
-                            Adotados
+                        <Link href="/cats" className="hover:text-blue-200">
+                            Gatos
                         </Link>
-                        <Link href="/about" className="hover:text-blue-200">
-                            Sobre
+                        <Link href="/dogs" className="hover:text-blue-200">
+                            Cachorros
+                        </Link>
+                        <Link href="/favorites" className="hover:text-blue-200">
+                            Gatos Adotados
+                        </Link>
+                        <Link href="/dog-favorites" className="hover:text-blue-200">
+                            Cachorros Adotados
                         </Link>
                     </div>
                 </div>
